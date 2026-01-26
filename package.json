@@ -1,0 +1,45 @@
+{
+  "name": "@looksky495/fescore",
+  "version": "2.0.0",
+  "description": "スコアボードです。",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "dist": "npx electron-builder"
+  },
+  "author": {
+    "name": "looksky495",
+    "url": "https://twitter.com/looksky495",
+    "email": "looksky603@gmail.com"
+  },
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
+  },
+  "build": {
+    "appId": "com.looksky495.fescore",
+    "productName": "スコアボード",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "src",
+      "package.json",
+      "package-lock.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
