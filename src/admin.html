@@ -1861,7 +1861,7 @@
 
         const keyCode = (event.ctrlKey ? "Control+" : "") + (event.metaKey ? "Meta+" : "") + (event.altKey ? "Alt+" : "") + (event.shiftKey ? "Shift+" : "") + event.key;
         const localName = event.target.localName.toLowerCase();
-        const isEventFromInput = localName === "input" || localName !== "textarea";
+        const isEventFromInput = localName === "input" || localName === "textarea";
 
         if (keyCode === "Control+n" && dataTable.currentTab === 0){
           handleAddGameClick(event);
