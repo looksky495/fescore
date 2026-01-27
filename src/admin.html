@@ -1439,6 +1439,7 @@
         Elements.id.prompt.handicap.blue.value = 0;
         Elements.id.prompt.handicap.white.value = 0;
         Elements.id.prompt.handicap.green.value = 0;
+        Elements.id.prompt.apply.textContent = "追加";
       } else {
         const gameData = dataTable.gameList[dataTable.selectedGameIndex];
         Elements.id.prompt.gametitle.value = gameData.name;
@@ -1613,227 +1614,213 @@
 
     // イベント類登録
     {
-      Elements.id.side_gameUl.defEvents = {
-        scroll: function (){
-          const currentScrollTop = this.scrollTop;
-          const maxScrollTop = this.scrollHeight - this.getBoundingClientRect().height;
-          // console.log(currentScrollTop, this.getBoundingClientRect().height);
-          if (currentScrollTop <= 0){
-            this.classList.remove("upper-space-exist");
-          } else this.classList.add("upper-space-exist");
-          if (currentScrollTop >= maxScrollTop){
-            this.classList.remove("lower-space-exist");
-          } else this.classList.add("lower-space-exist");
-        }
+      const handleSideGameScroll = function (){
+        const currentScrollTop = this.scrollTop;
+        const maxScrollTop = this.scrollHeight - this.getBoundingClientRect().height;
+        if (currentScrollTop <= 0){
+          this.classList.remove("upper-space-exist");
+        } else this.classList.add("upper-space-exist");
+        if (currentScrollTop >= maxScrollTop){
+          this.classList.remove("lower-space-exist");
+        } else this.classList.add("lower-space-exist");
       };
-      Elements.window.defEvents = {
-        resize: function (){
-          Elements.root.style.setProperty("--viewport-height", window.innerHeight+"px");
-          (Elements.id.side_gameUl.defEvents.scroll).bind(Elements.id.side_gameUl)();
-        }
+
+      const handleResize = function (){
+        Elements.root.style.setProperty("--viewport-height", window.innerHeight+"px");
+        handleSideGameScroll.call(Elements.id.side_gameUl);
       };
-      Elements.id.button.addGame.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          showGameInfoEditor(true);
-        }
+
+      const handleAddGameClick = function (event){
+        event.preventDefault();
+        showGameInfoEditor(true);
       };
-      Elements.id.button.editGame.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          showGameInfoEditor(false);
-        }
+
+      const handleEditGameClick = function (event){
+        event.preventDefault();
+        showGameInfoEditor(false);
       };
-      Elements.id.button.gameUp.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          moveGame("up");
-        }
+
+      const handleGameUpClick = function (event){
+        event.preventDefault();
+        moveGame("up");
       };
-      Elements.id.button.gameDown.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          moveGame("down");
-        }
+
+      const handleGameDownClick = function (event){
+        event.preventDefault();
+        moveGame("down");
       };
-      Elements.id.button.removeGame.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          removeGame();
-        }
+
+      const handleRemoveGameClick = function (event){
+        event.preventDefault();
+        removeGame();
       };
-      Elements.id.prompt.addRank.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          const li = document.createElement("li");
-          const input = document.createElement("input");
-          input.type = "number";
-          input.value = 0;
-          li.append(input);
-          Elements.id.prompt.scores.append(li);
-          dataTable.editgame_data.scores.push({li, input});
-        }
+
+      const handleAddRankClick = function (event){
+        event.preventDefault();
+        const li = document.createElement("li");
+        const input = document.createElement("input");
+        input.type = "number";
+        input.value = 0;
+        li.append(input);
+        Elements.id.prompt.scores.append(li);
+        dataTable.editgame_data.scores.push({li, input});
       };
-      Elements.id.prompt.cancel.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          dataTable.editgame_isProcessing = false;
-          Elements.id.prompt.parent.classList.add("hide");
-        }
+
+      const handlePromptCancelClick = function (event){
+        event.preventDefault();
+        dataTable.editgame_isProcessing = false;
+        Elements.id.prompt.parent.classList.add("hide");
       };
-      Elements.id.prompt.apply.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          if (dataTable.editgame_isNewGame){
-            const gameData = dataTable.editgame_data.newData;
-            gameData.name = Elements.id.prompt.gametitle.value;
-            gameData.score = [];
-            for (const scoreItem of dataTable.editgame_data.scores){
-              const val = scoreItem.input.valueAsNumber;
-              if (!isNaN(val)) gameData.score.push(val);
-            }
-            for (let i=0, l=Elements.id.prompt.multigame.valueAsNumber; i<l; i++){
-              gameData.rank.push(Array(gameData.score.length).fill(null));
-            }
-            gameData.finished = !gameData.rank.flat().includes(null);
-            gameData.handicap = {};
-            gameData.handicap.red = Elements.id.prompt.handicap.red.value - 0;
-            gameData.handicap.blue = Elements.id.prompt.handicap.blue.value - 0;
-            gameData.handicap.white = Elements.id.prompt.handicap.white.value - 0;
-            gameData.handicap.green = Elements.id.prompt.handicap.green.value - 0;
-            addGame(gameData);
-          } else {
-            const gameData = dataTable.gameList[dataTable.selectedGameIndex];
-            const lastScoreLen = gameData.score.length;
-            const lastMultigameCount = gameData.rank.length;
-            const nextMultigameCount = Elements.id.prompt.multigame.valueAsNumber;
-            gameData.const.td_name.textContent = gameData.name = Elements.id.prompt.gametitle.value;
-            gameData.score = [];
-            gameData.handicap.red = Elements.id.prompt.handicap.red.value - 0;
-            gameData.handicap.blue = Elements.id.prompt.handicap.blue.value - 0;
-            gameData.handicap.white = Elements.id.prompt.handicap.white.value - 0;
-            gameData.handicap.green = Elements.id.prompt.handicap.green.value - 0;
-            for (const scoreItem of dataTable.editgame_data.scores){
-              const val = scoreItem.input.valueAsNumber;
-              if (!isNaN(val)) gameData.score.push(val);
-            }
-            if (lastScoreLen !== gameData.score.length) gameData.rank = [];
-            gameData.rank.splice(nextMultigameCount, gameData.rank.length); // とりあえず長さ分消しておけば大丈夫
-            for (let i=gameData.rank.length, l=nextMultigameCount; i<l; i++){
-              gameData.rank.push(Array(gameData.score.length).fill(null));
-            }
-            gameData.const.td_times_c.textContent = gameData.rank.length;
-            gameData.const.td_stat.textContent = (gameData.finished = !gameData.rank.flat().includes(null)) ? "終了" : "";
+
+      const handlePromptApplyClick = function (event){
+        event.preventDefault();
+        if (dataTable.editgame_isNewGame){
+          const gameData = dataTable.editgame_data.newData;
+          gameData.name = Elements.id.prompt.gametitle.value;
+          gameData.score = [];
+          for (const scoreItem of dataTable.editgame_data.scores){
+            const val = scoreItem.input.valueAsNumber;
+            if (!isNaN(val)) gameData.score.push(val);
           }
-          dataTable.editgame_isProcessing = false;
-          Elements.id.prompt.parent.classList.add("hide");
-          showTeamScore();
-          submitScoreData();
-        }
-      };
-      Elements.id.rank.multigamePrev.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          if (Elements.id.rank.multigamePrevSvg.classList.contains("disabled")) return;
-          viewRank(dataTable.viewedMultigameIndex - 1);
-        }
-      };
-      Elements.id.rank.multigameNext.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          if (Elements.id.rank.multigameNextSvg.classList.contains("disabled")) return;
-          viewRank(dataTable.viewedMultigameIndex + 1);
-        }
-      };
-      Elements.id.deduction.cancel.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          removeDeduction(dataTable.selectedDeduction);
-        }
-      };
-      Elements.id.deduction.teamOption.red.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          dataTable.deductedTeam = "red";
-          Elements.id.deduction.teamOption.red.classList.add("selected");
-          Elements.id.deduction.teamOption.blue.classList.remove("selected");
-          Elements.id.deduction.teamOption.white.classList.remove("selected");
-          Elements.id.deduction.teamOption.green.classList.remove("selected");
-        }
-      };
-      Elements.id.deduction.teamOption.blue.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          dataTable.deductedTeam = "blue";
-          Elements.id.deduction.teamOption.red.classList.remove("selected");
-          Elements.id.deduction.teamOption.blue.classList.add("selected");
-          Elements.id.deduction.teamOption.white.classList.remove("selected");
-          Elements.id.deduction.teamOption.green.classList.remove("selected");
-        }
-      };
-      Elements.id.deduction.teamOption.white.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          dataTable.deductedTeam = "white";
-          Elements.id.deduction.teamOption.red.classList.remove("selected");
-          Elements.id.deduction.teamOption.blue.classList.remove("selected");
-          Elements.id.deduction.teamOption.white.classList.add("selected");
-          Elements.id.deduction.teamOption.green.classList.remove("selected");
-        }
-      };
-      Elements.id.deduction.teamOption.green.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          dataTable.deductedTeam = "green";
-          Elements.id.deduction.teamOption.red.classList.remove("selected");
-          Elements.id.deduction.teamOption.blue.classList.remove("selected");
-          Elements.id.deduction.teamOption.white.classList.remove("selected");
-          Elements.id.deduction.teamOption.green.classList.add("selected");
-        }
-      };
-      Elements.id.deduction.apply.defEvents = {
-        click: function (event){
-          event.preventDefault();
-          const count = Elements.id.deduction.input.valueAsNumber;
-          if (!isNaN(count)) addDeduction(dataTable.deductedTeam, count);
-          Elements.id.deduction.input.value = "";
-        }
-      };
-      Elements.id.configDeductionLevel.defEvents = {
-        input: function (event){
-          const value = Elements.id.configDeductionLevel.valueAsNumber;
-          if (!isNaN(value)) dataTable.config.deduct = value;
-          showTeamScore();
-          submitScoreData();
-        }
-      };
-      Elements.id.configDeductionLimit.defEvents = {
-        input: function (event){
-          dataTable.config.dLimit = Elements.id.configDeductionLimit.checked;
-          showTeamScore();
-          submitScoreData();
-        }
-      };
-      ({fn: function addAllEventListeners(parent){
-        for (const key in parent){
-          const item = parent[key];
-          if (item instanceof Element || item instanceof Window){
-            if (!item.hasOwnProperty("defEvents")) continue;
-            for (const eventName in item.defEvents){ // item.defEventsがundefinedでも大丈夫
-              item.addEventListener(eventName, item.defEvents[eventName], { passive: false });
-              console.log("Event listener has been registered. (" + key + ": " + eventName + ")");
-            }
-          } else {
-            if (item === 0) throw "0";
-            this.fn(item);
+          for (let i=0, l=Elements.id.prompt.multigame.valueAsNumber; i<l; i++){
+            gameData.rank.push(Array(gameData.score.length).fill(null));
           }
+          gameData.finished = !gameData.rank.flat().includes(null);
+          gameData.handicap = {};
+          gameData.handicap.red = Elements.id.prompt.handicap.red.value - 0;
+          gameData.handicap.blue = Elements.id.prompt.handicap.blue.value - 0;
+          gameData.handicap.white = Elements.id.prompt.handicap.white.value - 0;
+          gameData.handicap.green = Elements.id.prompt.handicap.green.value - 0;
+          addGame(gameData);
+        } else {
+          const gameData = dataTable.gameList[dataTable.selectedGameIndex];
+          const lastScoreLen = gameData.score.length;
+          const lastMultigameCount = gameData.rank.length;
+          const nextMultigameCount = Elements.id.prompt.multigame.valueAsNumber;
+          gameData.const.td_name.textContent = gameData.name = Elements.id.prompt.gametitle.value;
+          gameData.score = [];
+          gameData.handicap.red = Elements.id.prompt.handicap.red.value - 0;
+          gameData.handicap.blue = Elements.id.prompt.handicap.blue.value - 0;
+          gameData.handicap.white = Elements.id.prompt.handicap.white.value - 0;
+          gameData.handicap.green = Elements.id.prompt.handicap.green.value - 0;
+          for (const scoreItem of dataTable.editgame_data.scores){
+            const val = scoreItem.input.valueAsNumber;
+            if (!isNaN(val)) gameData.score.push(val);
+          }
+          if (lastScoreLen !== gameData.score.length) gameData.rank = [];
+          gameData.rank.splice(nextMultigameCount, gameData.rank.length);
+          for (let i=gameData.rank.length, l=nextMultigameCount; i<l; i++){
+            gameData.rank.push(Array(gameData.score.length).fill(null));
+          }
+          gameData.const.td_times_c.textContent = gameData.rank.length;
+          gameData.const.td_stat.textContent = (gameData.finished = !gameData.rank.flat().includes(null)) ? "終了" : "";
         }
-      }}).fn(Elements);
-      (Elements.window.defEvents.resize).bind(Elements.window)();
-      (Elements.id.side_gameUl.defEvents.scroll).bind(Elements.id.side_gameUl)();
+        dataTable.editgame_isProcessing = false;
+        Elements.id.prompt.parent.classList.add("hide");
+        showTeamScore();
+        submitScoreData();
+      };
+
+      const handleMultigamePrevClick = function (event){
+        event.preventDefault();
+        if (Elements.id.rank.multigamePrevSvg.classList.contains("disabled")) return;
+        viewRank(dataTable.viewedMultigameIndex - 1);
+      };
+
+      const handleMultigameNextClick = function (event){
+        event.preventDefault();
+        if (Elements.id.rank.multigameNextSvg.classList.contains("disabled")) return;
+        viewRank(dataTable.viewedMultigameIndex + 1);
+      };
+
+      const handleDeductionCancelClick = function (event){
+        event.preventDefault();
+        removeDeduction(dataTable.selectedDeduction);
+      };
+
+      const handleDeductionTeamRedClick = function (event){
+        event.preventDefault();
+        dataTable.deductedTeam = "red";
+        Elements.id.deduction.teamOption.red.classList.add("selected");
+        Elements.id.deduction.teamOption.blue.classList.remove("selected");
+        Elements.id.deduction.teamOption.white.classList.remove("selected");
+        Elements.id.deduction.teamOption.green.classList.remove("selected");
+      };
+
+      const handleDeductionTeamBlueClick = function (event){
+        event.preventDefault();
+        dataTable.deductedTeam = "blue";
+        Elements.id.deduction.teamOption.red.classList.remove("selected");
+        Elements.id.deduction.teamOption.blue.classList.add("selected");
+        Elements.id.deduction.teamOption.white.classList.remove("selected");
+        Elements.id.deduction.teamOption.green.classList.remove("selected");
+      };
+
+      const handleDeductionTeamWhiteClick = function (event){
+        event.preventDefault();
+        dataTable.deductedTeam = "white";
+        Elements.id.deduction.teamOption.red.classList.remove("selected");
+        Elements.id.deduction.teamOption.blue.classList.remove("selected");
+        Elements.id.deduction.teamOption.white.classList.add("selected");
+        Elements.id.deduction.teamOption.green.classList.remove("selected");
+      };
+
+      const handleDeductionTeamGreenClick = function (event){
+        event.preventDefault();
+        dataTable.deductedTeam = "green";
+        Elements.id.deduction.teamOption.red.classList.remove("selected");
+        Elements.id.deduction.teamOption.blue.classList.remove("selected");
+        Elements.id.deduction.teamOption.white.classList.remove("selected");
+        Elements.id.deduction.teamOption.green.classList.add("selected");
+      };
+
+      const handleDeductionApplyClick = function (event){
+        event.preventDefault();
+        const count = Elements.id.deduction.input.valueAsNumber;
+        if (!isNaN(count)) addDeduction(dataTable.deductedTeam, count);
+        Elements.id.deduction.input.value = "";
+      };
+
+      const handleConfigDeductionLevelInput = function (){
+        const value = Elements.id.configDeductionLevel.valueAsNumber;
+        if (!isNaN(value)) dataTable.config.deduct = value;
+        showTeamScore();
+        submitScoreData();
+      };
+
+      const handleConfigDeductionLimitInput = function (){
+        dataTable.config.dLimit = Elements.id.configDeductionLimit.checked;
+        showTeamScore();
+        submitScoreData();
+      };
+
+      Elements.window.addEventListener("resize", handleResize, { passive: false });
+      Elements.id.side_gameUl.addEventListener("scroll", handleSideGameScroll, { passive: false });
+      Elements.id.button.addGame.addEventListener("click", handleAddGameClick, { passive: false });
+      Elements.id.button.editGame.addEventListener("click", handleEditGameClick, { passive: false });
+      Elements.id.button.gameUp.addEventListener("click", handleGameUpClick, { passive: false });
+      Elements.id.button.gameDown.addEventListener("click", handleGameDownClick, { passive: false });
+      Elements.id.button.removeGame.addEventListener("click", handleRemoveGameClick, { passive: false });
+      Elements.id.prompt.addRank.addEventListener("click", handleAddRankClick, { passive: false });
+      Elements.id.prompt.cancel.addEventListener("click", handlePromptCancelClick, { passive: false });
+      Elements.id.prompt.apply.addEventListener("click", handlePromptApplyClick, { passive: false });
+      Elements.id.rank.multigamePrev.addEventListener("click", handleMultigamePrevClick, { passive: false });
+      Elements.id.rank.multigameNext.addEventListener("click", handleMultigameNextClick, { passive: false });
+      Elements.id.deduction.cancel.addEventListener("click", handleDeductionCancelClick, { passive: false });
+      Elements.id.deduction.teamOption.red.addEventListener("click", handleDeductionTeamRedClick, { passive: false });
+      Elements.id.deduction.teamOption.blue.addEventListener("click", handleDeductionTeamBlueClick, { passive: false });
+      Elements.id.deduction.teamOption.white.addEventListener("click", handleDeductionTeamWhiteClick, { passive: false });
+      Elements.id.deduction.teamOption.green.addEventListener("click", handleDeductionTeamGreenClick, { passive: false });
+      Elements.id.deduction.apply.addEventListener("click", handleDeductionApplyClick, { passive: false });
+      Elements.id.configDeductionLevel.addEventListener("input", handleConfigDeductionLevelInput, { passive: false });
+      Elements.id.configDeductionLimit.addEventListener("input", handleConfigDeductionLimitInput, { passive: false });
+
+      handleResize();
+      handleSideGameScroll.call(Elements.id.side_gameUl);
 
       const tabChangeEvent = event => {
         if (dataTable.gameList.length === 0 && event.currentTarget.id !== "frame-construction"){
+          event.preventDefault();
           console.warn("Cannot display the tab because there are no games available!");
           return;
         }
@@ -1846,7 +1833,7 @@
         event.currentTarget.parentData.mainFrame.classList.remove("hide");
         event.currentTarget.parentData.subItem.classList.remove("hide");
         event.currentTarget.parentData.button.querySelector("div.nav-item-icon").classList.add("selected");
-        (Elements.id.side_gameUl.defEvents.scroll).bind(Elements.id.side_gameUl)();
+        handleSideGameScroll.call(Elements.id.side_gameUl);
 
         if (dataTable.selectedGameIndex === null && event.currentTarget.id !== "frame-construction"){
           selectGame(0);
@@ -1868,20 +1855,28 @@
 
       // Mac Safariではbeforeinputイベントが先に発火するようで、preventDefaultができない
       window.addEventListener("keydown", event => {
+        if (event.code === "Escape") document.activeElement.blur();
+        // 競技を追加・編集中はほとんどのキーイベントを拾わない
         if (dataTable.editgame_isProcessing) return;
+
         const keyCode = (event.ctrlKey ? "Control+" : "") + (event.metaKey ? "Meta+" : "") + (event.altKey ? "Alt+" : "") + (event.shiftKey ? "Shift+" : "") + event.key;
         const localName = event.target.localName.toLowerCase();
-        const isEventFromBody = localName !== "input" && localName !== "textarea";
-        if (keyCode === "Control+ArrowLeft"){
-          const tabId = (dataTable.currentTab - 1 + dataTable.static.tabData.length) % dataTable.static.tabData.length;
+        const isEventFromInput = localName === "input" || localName !== "textarea";
+
+        if (keyCode === "Control+n" && dataTable.currentTab === 0){
+          handleAddGameClick(event);
+          tabChangeEvent({ currentTarget: dataTable.static.tabData[0].button });
+          // event.preventDefault();
+        } else if (keyCode === "Control+ArrowRight"){
+          const tabId = dataTable.currentTab === (dataTable.static.tabData.length - 1) ? 0 : dataTable.currentTab + 1;
           tabChangeEvent({ currentTarget: dataTable.static.tabData[tabId].button });
           event.preventDefault();
-        } else if (keyCode === "Control+ArrowRight"){
-          const tabId = (dataTable.currentTab + 1) % dataTable.static.tabData.length;
+        } else if (keyCode === "Control+ArrowLeft"){
+          const tabId = dataTable.currentTab === 0 ? dataTable.static.tabData.length - 1 : dataTable.currentTab - 1;
           tabChangeEvent({ currentTarget: dataTable.static.tabData[tabId].button });
           event.preventDefault();
         }
-        if (isEventFromBody){
+        if (!isEventFromInput){
           if (dataTable.gameList.length !== 0){
             if (keyCode === "ArrowUp"){
               if (dataTable.selectedGameIndex === null){
@@ -1911,9 +1906,9 @@
               }
             } else if (dataTable.currentTab === 1){
               if (keyCode === "ArrowLeft"){
-                Elements.id.rank.multigamePrev.defEvents.click(event);
+                handleMultigamePrevClick(event);
               } else if (keyCode === "ArrowRight"){
-                Elements.id.rank.multigameNext.defEvents.click(event);
+                handleMultigameNextClick(event);
               } else if (keyCode === "u"){
                 const keyshortPos = calcKeyshortPos();
                 if (keyshortPos !== -1) dataTable.rankElements[keyshortPos].btn1.click();
@@ -1965,8 +1960,7 @@
             Elements.id.deduction.apply.click();
           }
         }
-        if (event.code === "Escape") document.activeElement.blur();
-        console.log("[keydown] %c"+event.target.localName.toLowerCase()+"%c => "+keyCode+" (key: "+event.key+" / code: "+event.code+" / keyCode: "+event.keyCode+")", isEventFromBody ? "color: #071;" : "color: initial;", "color: initial;");
+        console.log("[keydown] %c"+event.target.localName.toLowerCase()+"%c => "+keyCode+" (key: "+event.key+" / code: "+event.code+" / keyCode: "+event.keyCode+")", isEventFromInput ? "color: initial;" : "color: #071;", "color: initial;");
       }, { passive: false });
     }
 
