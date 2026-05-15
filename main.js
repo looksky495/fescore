@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { app, ipcMain } from "electron";
 import MainWindow from "./src/window.js";
+import manifest from "./package.json" with { type: "json" };
 
 const removeEnabled = process.argv.includes("--remove-enabled");
 
@@ -18,16 +19,39 @@ const ApplicationDataPath = appdata();
 const ScoreDataPath = path.join(ApplicationDataPath, "./AppScoreData.json");
 
 app.on("ready", async () => {
-  if (!fs.existsSync(ScoreDataPath)) {
-    fs.writeFileSync(ScoreDataPath, `{"config": { "deduct": 3, "dLimit": true }, "games": []}`, { encoding: "utf-8" });
+  if (!fs.existsSync(ScoreDataPath)){
+    fs.writeFileSync(ScoreDataPath, JSON.stringify(
+      {
+        version: manifest.version, // 最終読み込みバージョン
+        preferences: { // PreferencesWindow が変更できるデータ
+          destination: {
+            type: "relative",
+            path: ".",
+          }, // 保存先
+          teams: [
+            { name: "赤", color: "#ff8569" },
+            { name: "青", color: "#22e3f4" },
+            { name: "白", color: "#ffffff" },
+            { name: "緑", color: "#96d35f" },
+          ],
+        },
+        program: { // MainWindow が変更できるデータ
+          config: { "deduct": 3, "dLimit": true }, games: []
+        }
+      }
+    ), { encoding: "utf-8" });
   }
   ipcMain.handle("readScoreData", () => {
     const scoreData = JSON.parse(fs.readFileSync(ScoreDataPath, { encoding: "utf-8" }));
-    return {scoreData, removeEnabled};
+    return {scoreData: scoreData.program, removeEnabled};
   });
   ipcMain.handle("submitScoreData", (_, data) => {
     console.log("["+(new Date()).toLocaleString()+"] Score Data Received.");
-    fs.writeFileSync(ScoreDataPath, JSON.stringify(data), { encoding: "utf-8" });
+
+    fs.writeFileSync(ScoreDataPath, JSON.stringify({
+      version: manifest.version,
+      program: data
+    }), { encoding: "utf-8" });
   });
 
   new MainWindow();
