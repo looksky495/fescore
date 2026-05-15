@@ -130,7 +130,8 @@ class MainWindow {
         color: "#223a48",
         symbolColor: "#74b1be"
       },
-      title: "#あたいの足技みさらせやー"
+      title: "#あたいの足技みさらせやー",
+      backgroundColor: "#111"
     });
 
     window.on("closed", () => {
