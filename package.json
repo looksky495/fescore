@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "com.looksky495.fescore",
-    "productName": "スコアボード",
+    "productName": "FeScore",
     "directories": {
       "output": "dist"
     },
