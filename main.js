@@ -1,7 +1,7 @@
 import appdata from "./src/appdata_path.js";
 import path from "path";
 import fs from "fs";
-import { app, ipcMain } from "electron";
+import { app, ipcMain, shell } from "electron";
 import MainWindow from "./src/window.js";
 import manifest from "./package.json" with { type: "json" };
 
@@ -17,41 +17,167 @@ console.log("\n\n");
 
 const ApplicationDataPath = appdata();
 const ScoreDataPath = path.join(ApplicationDataPath, "./AppScoreData.json");
+const ScoresDirPath = path.join(ApplicationDataPath, "./scores/");
+const AppSettingsPath = path.join(ApplicationDataPath, "./settings.json");
+
+const ensureDir = dirPath => {
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+};
+
+const createScoreDataTemplate = () => ({
+  version: manifest.version,
+  preferences: {
+    destination: {
+      type: "relative",
+      path: ".",
+    },
+    teams: [
+      { name: "赤", color: "#ff8569" },
+      { name: "青", color: "#22e3f4" },
+      { name: "白", color: "#ffffff" },
+      { name: "緑", color: "#96d35f" },
+    ],
+  },
+  program: {
+    config: { "deduct": 3, "dLimit": true },
+    games: []
+  }
+});
+
+const readAppSettings = () => {
+  if (!fs.existsSync(AppSettingsPath)) return {};
+  try {
+    const data = JSON.parse(fs.readFileSync(AppSettingsPath, { encoding: "utf-8" }));
+    if (typeof data.activeScorePath !== "string") return {};
+    return data;
+  } catch {
+    return {};
+  }
+};
+
+const writeAppSettings = settings => {
+  fs.writeFileSync(AppSettingsPath, JSON.stringify(settings), { encoding: "utf-8" });
+};
+
+const ensureScoreFile = scorePath => {
+  if (!fs.existsSync(scorePath)) {
+    fs.writeFileSync(scorePath, JSON.stringify(createScoreDataTemplate()), { encoding: "utf-8" });
+  }
+};
+
+const resolveActiveScorePath = settings => {
+  if (settings.activeScorePath && fs.existsSync(settings.activeScorePath)) {
+    return settings.activeScorePath;
+  }
+  ensureDir(ScoresDirPath);
+  if (fs.existsSync(ScoresDirPath)) {
+    const candidates = fs.readdirSync(ScoresDirPath)
+      .filter(name => name.endsWith(".json"))
+      .sort();
+    if (candidates.length > 0) {
+      return path.join(ScoresDirPath, candidates[candidates.length - 1]);
+    }
+  }
+  const newPath = path.join(ScoresDirPath, buildTimestampFileName());
+  ensureScoreFile(newPath);
+  return newPath;
+};
+
+const buildTimestampFileName = () => {
+  const now = new Date();
+  const pad = value => String(value).padStart(2, "0");
+  const stamp = [
+    now.getFullYear(),
+    pad(now.getMonth() + 1),
+    pad(now.getDate()),
+    "-",
+    pad(now.getHours()),
+    pad(now.getMinutes()),
+    pad(now.getSeconds())
+  ].join("");
+  return `${stamp}.json`;
+};
+
+let appSettings = null;
+let activeScorePath = null;
 
 app.on("ready", async () => {
-  if (!fs.existsSync(ScoreDataPath)){
-    fs.writeFileSync(ScoreDataPath, JSON.stringify(
-      {
-        version: manifest.version, // 最終読み込みバージョン
-        preferences: { // PreferencesWindow が変更できるデータ
-          destination: {
-            type: "relative",
-            path: ".",
-          }, // 保存先
-          teams: [
-            { name: "赤", color: "#ff8569" },
-            { name: "青", color: "#22e3f4" },
-            { name: "白", color: "#ffffff" },
-            { name: "緑", color: "#96d35f" },
-          ],
-        },
-        program: { // MainWindow が変更できるデータ
-          config: { "deduct": 3, "dLimit": true }, games: []
-        }
-      }
-    ), { encoding: "utf-8" });
+  ensureDir(ScoresDirPath);
+  appSettings = readAppSettings();
+  activeScorePath = resolveActiveScorePath(appSettings);
+  if (appSettings.activeScorePath !== activeScorePath) {
+    appSettings.activeScorePath = activeScorePath;
+    writeAppSettings(appSettings);
   }
+  ensureScoreFile(activeScorePath);
   ipcMain.handle("readScoreData", () => {
-    const scoreData = JSON.parse(fs.readFileSync(ScoreDataPath, { encoding: "utf-8" }));
+    const scoreData = JSON.parse(fs.readFileSync(activeScorePath, { encoding: "utf-8" }));
     return {scoreData: scoreData.program, removeEnabled};
   });
   ipcMain.handle("submitScoreData", (_, data) => {
     console.log("["+(new Date()).toLocaleString()+"] Score Data Received.");
-
-    fs.writeFileSync(ScoreDataPath, JSON.stringify({
-      version: manifest.version,
-      program: data
-    }), { encoding: "utf-8" });
+    let scoreData = createScoreDataTemplate();
+    if (fs.existsSync(activeScorePath)) {
+      try {
+        scoreData = JSON.parse(fs.readFileSync(activeScorePath, { encoding: "utf-8" }));
+      } catch {
+        scoreData = createScoreDataTemplate();
+      }
+    }
+    scoreData.version = manifest.version;
+    scoreData.program = data;
+    fs.writeFileSync(activeScorePath, JSON.stringify(scoreData), { encoding: "utf-8" });
+  });
+  ipcMain.handle("getActiveScoreFile", () => {
+    return { path: activeScorePath, name: path.basename(activeScorePath) };
+  });
+  ipcMain.handle("getSelectedScoreFile", () => {
+    const selectedPath = appSettings?.activeScorePath;
+    if (typeof selectedPath === "string" && fs.existsSync(selectedPath)) {
+      return { path: selectedPath, name: path.basename(selectedPath) };
+    }
+    return { path: activeScorePath, name: path.basename(activeScorePath) };
+  });
+  ipcMain.handle("listScoreFiles", () => {
+    const items = [];
+    if (fs.existsSync(ScoreDataPath)) {
+      items.push({ path: ScoreDataPath, name: path.basename(ScoreDataPath) });
+    }
+    if (fs.existsSync(ScoresDirPath)) {
+      for (const fileName of fs.readdirSync(ScoresDirPath)) {
+        if (!fileName.endsWith(".json")) continue;
+        const filePath = path.join(ScoresDirPath, fileName);
+        items.push({ path: filePath, name: fileName });
+      }
+    }
+    items.sort((a, b) => a.name.localeCompare(b.name));
+    return items;
+  });
+  ipcMain.handle("createScoreFile", () => {
+    ensureDir(ScoresDirPath);
+    const filePath = path.join(ScoresDirPath, buildTimestampFileName());
+    fs.writeFileSync(filePath, JSON.stringify(createScoreDataTemplate()), { encoding: "utf-8" });
+    return { path: filePath, name: path.basename(filePath) };
+  });
+  ipcMain.handle("setActiveScoreFile", (_, filePath) => {
+    if (typeof filePath !== "string") throw new Error("Invalid path");
+    if (!filePath.startsWith(ApplicationDataPath)) throw new Error("Path outside app data");
+    if (!fs.existsSync(filePath)) throw new Error("File not found");
+    appSettings = appSettings || readAppSettings();
+    appSettings.activeScorePath = filePath;
+    writeAppSettings(appSettings);
+    return { path: filePath, name: path.basename(filePath) };
+  });
+  ipcMain.handle("showActiveScoreFile", () => {
+    shell.showItemInFolder(activeScorePath);
+    return true;
+  });
+  ipcMain.handle("showScoreFile", (_, filePath) => {
+    if (typeof filePath !== "string") throw new Error("Invalid path");
+    if (!filePath.startsWith(ApplicationDataPath)) throw new Error("Path outside app data");
+    if (!fs.existsSync(filePath)) throw new Error("File not found");
+    shell.showItemInFolder(filePath);
+    return true;
   });
 
   new MainWindow();

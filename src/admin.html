@@ -693,6 +693,125 @@
     .m-prompt #m-prompt-form-add-rank:hover {
       background: #666;
     }
+
+    .m-settings {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #0008;
+      z-index: 9999;
+    }
+    .m-settings .m-settings-box {
+      position: fixed;
+      left: calc(100vw / 2 - 340px);
+      top: calc(100vh / 2 - 260px);
+      width: 680px;
+      height: 520px;
+      background: #2a2a2a;
+      border: solid 1px #777;
+      border-radius: 6px;
+      color: #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+    .m-settings .m-settings-header {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 14px 18px;
+      border-bottom: solid 1px #555;
+    }
+    .m-settings .m-settings-body {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 18px;
+    }
+    .m-settings .m-settings-section {
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: solid 1px #444;
+    }
+    .m-settings .m-settings-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .m-settings .m-settings-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .m-settings .m-settings-label {
+      width: 120px;
+      font-size: 14px;
+      color: #bbb;
+    }
+    .m-settings .m-settings-value {
+      flex: 1;
+      font-size: 14px;
+      color: #fff;
+      word-break: break-all;
+      background: #1b1b1b;
+      border: solid 1px #444;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
+    .m-settings .m-settings-list {
+      background: #1b1b1b;
+      border: solid 1px #444;
+      border-radius: 4px;
+      max-height: 160px;
+      overflow: auto;
+      padding: 6px;
+    }
+    .m-settings .m-settings-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .m-settings .m-settings-file-item:hover {
+      background: #333;
+    }
+    .m-settings .m-settings-file-item.selected {
+      background: #215662;
+      color: #fff;
+    }
+    .m-settings .m-settings-file-meta {
+      font-size: 12px;
+      color: #aaa;
+      margin-left: 10px;
+      white-space: nowrap;
+    }
+    .m-settings .m-settings-note {
+      font-size: 13px;
+      color: #f0c36d;
+      margin-top: 8px;
+    }
+    .m-settings .m-settings-note.dim {
+      color: #aaa;
+    }
+    .m-settings .m-settings-actions button {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: solid 1px #666;
+      background: #3a3a3a;
+      color: #eee;
+      cursor: pointer;
+    }
+    .m-settings .m-settings-actions button:hover {
+      background: #444;
+    }
+    .m-settings .m-settings-footer {
+      border-top: solid 1px #555;
+      padding: 10px 18px;
+      text-align: right;
+    }
     
     .settings-icon-container {
       display: flex;
@@ -772,7 +891,7 @@
           <div id="nav-clock-time">04:00:00</div>
         </div>
         <div class="settings-icon-container">
-          <svg fill="#8b8b8b" width="30px" height="30px" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" class="settings-icon">
+          <svg fill="#8b8b8b" width="30px" height="30px" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" class="settings-icon" id="settings-icon">
             <path d="M22.5 15c-.822 0-1.5.678-1.5 1.5v.785c-.393.114-.77.267-1.13.465l-.313-.314c-.582-.582-1.54-.582-2.12 0-.583.58-.583 1.54 0 2.12l.313.315c-.2.36-.354.736-.47 1.13h-.78c-.822 0-1.5.678-1.5 1.5s.678 1.5 1.5 1.5h.785c.114.393.267.77.465 1.13l-.314.313c-.582.582-.582 1.54 0 2.12.58.583 1.54.583 2.12 0l.315-.313c.36.2.736.354 1.13.47v.78c0 .822.678 1.5 1.5 1.5s1.5-.678 1.5-1.5v-.785c.393-.114.77-.267 1.13-.465l.313.314c.582.582 1.54.582 2.12 0 .583-.58.583-1.54 0-2.12l-.313-.315c.2-.36.354-.736.47-1.13h.78c.822 0 1.5-.678 1.5-1.5s-.678-1.5-1.5-1.5h-.785c-.114-.393-.267-.77-.465-1.13l.314-.313c.582-.582.582-1.54 0-2.12-.58-.583-1.54-.583-2.12 0l-.315.313c-.36-.2-.736-.354-1.13-.47v-.78c0-.822-.678-1.5-1.5-1.5zm0 1c.286 0 .5.214.5.5v1c0 .328.084.508.38.588.57.115 1.112.34 1.597.66.198.132.462.106.63-.062l.543-.543c.202-.202.505-.202.707 0 .202.202.202.505 0 .707l-.543.543c-.168.167-.195.43-.064.628.32.486.544 1.028.658 1.597.08.302.344.383.592.383h1c.286 0 .5.214.5.5 0 .286-.214.5-.5.5h-1c-.394 0-.528.158-.588.38-.115.57-.34 1.112-.66 1.597-.132.198-.106.462.062.63l.543.543c.202.202.202.505 0 .707-.202.202-.505.202-.707 0l-.543-.543c-.167-.168-.43-.195-.628-.064-.486.32-1.028.544-1.597.658-.264.07-.383.34-.383.592v1c0 .286-.214.5-.5.5-.286 0-.5-.214-.5-.5v-1c0-.37-.138-.523-.38-.588-.57-.115-1.112-.34-1.597-.66-.198-.132-.462-.106-.63.062l-.543.543c-.202.202-.505.202-.707 0-.202-.202-.202-.505 0-.707l.543-.543c.168-.167.195-.43.064-.628-.32-.486-.544-1.028-.658-1.597-.05-.252-.262-.383-.592-.383h-1c-.286 0-.5-.214-.5-.5 0-.286.214-.5.5-.5h1c.445 0 .524-.143.588-.38.115-.57.34-1.112.66-1.597.132-.198.106-.462-.062-.63l-.543-.543c-.202-.202-.202-.505 0-.707.202-.202.505-.202.707 0l.543.543c.167.168.43.195.628.064.486-.32 1.028-.544 1.597-.658.402-.092.383-.406.383-.592v-1c0-.286.214-.5.5-.5zm0 4c-1.375 0-2.5 1.125-2.5 2.5s1.125 2.5 2.5 2.5 2.5-1.125 2.5-2.5-1.125-2.5-2.5-2.5zm0 1c.834 0 1.5.666 1.5 1.5s-.666 1.5-1.5 1.5-1.5-.666-1.5-1.5.666-1.5 1.5-1.5zm-10-13C10.02 8 8 10.02 8 12.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5S14.98 8 12.5 8zm0 1c1.94 0 3.5 1.56 3.5 3.5S14.44 16 12.5 16 9 14.44 9 12.5 10.56 9 12.5 9zm-1-9c-.822 0-1.5.678-1.5 1.5v1.91c-.763.21-1.494.51-2.182.9L5.943 2.437c-.582-.582-1.54-.582-2.123 0L2.406 3.85c-.58.58-.58 1.54 0 2.12l1.887 1.887c-.382.677-.68 1.394-.887 2.143H1.5c-.822 0-1.5.678-1.5 1.5v2c0 .822.678 1.5 1.5 1.5h1.908c.207.757.507 1.48.893 2.164l-1.894 1.893c-.582.582-.582 1.54 0 2.123l1.414 1.414c.582.582 1.54.582 2.123 0l1.897-1.9c.68.39 1.404.69 2.16.898V23.5c0 .822.678 1.5 1.5 1.5h2c.664 0 .66-1 0-1h-2c-.286 0-.5-.214-.5-.5v-2.234c0-.234-.16-.437-.39-.49-.93-.212-1.82-.58-2.63-1.09-.196-.124-.452-.095-.617.068l-.006.01-.003.004-2.118 2.12c-.2.2-.507.2-.71 0l-1.413-1.415c-.2-.202-.2-.508 0-.71l2.123-2.12.004-.004.002-.003c.162-.165.19-.42.067-.616-.508-.81-.874-1.7-1.085-2.63-.052-.23-.255-.39-.49-.39H1.5c-.286 0-.5-.214-.5-.5v-2c0-.286.214-.5.5-.5h2.234c.234 0 .437-.16.49-.39.21-.923.574-1.806 1.077-2.61.125-.198.095-.454-.07-.62L3.113 5.265c-.202-.202-.202-.505 0-.707l1.414-1.414c.202-.202.508-.202.71 0L7.34 5.248c.165.165.42.194.62.07.814-.512 1.71-.88 2.647-1.093.228-.052.39-.255.39-.49V1.5c0-.286.214-.5.5-.5h2c.286 0 .5.214.5.5v2.234c0 .234.16.437.39.49.93.212 1.817.58 2.626 1.089.197.123.454.094.62-.07l2.1-2.1c.202-.202.505-.202.707 0l1.414 1.414c.202.202.202.505 0 .707L19.764 7.36c-.165.164-.194.42-.07.62.506.81.87 1.697 1.08 2.63.053.228.256.39.49.39H23.5c.286 0 .5.214.5.5v2c0 .668 1 .652 1 0v-2c0-.822-.678-1.5-1.5-1.5h-1.908c-.207-.756-.505-1.48-.89-2.164l1.862-1.865c.582-.58.582-1.54 0-2.12L21.15 2.436c-.58-.582-1.54-.582-2.12 0l-1.87 1.87c-.68-.39-1.405-.69-2.16-.898V1.5c0-.822-.678-1.5-1.5-1.5z"></path>
           </svg>
         </div>
@@ -783,7 +902,6 @@
     <div class="main-content-frame flex-column-list">
       <div class="side-menu" id="side-menu">
         <div class="side-game-progress" id="side-game-progress">
-          <!-- progressの中で隠したり出現させたりした方が楽だから、ここに設定ボタンを入れよう！！！（アウト） -->
           <div role="button" class="side-show-settings"></div>
           <div class="side-team-score">
             <div class="item-title">選択された競技までの得点</div>
@@ -1062,6 +1180,41 @@
         </div>
       </div>
     </div>
+    <div class="m-settings hide" id="m-settings">
+      <div class="m-settings-box">
+        <div class="m-settings-header">設定</div>
+        <div class="m-settings-body">
+          <div class="m-settings-section">
+            <div class="m-settings-title">データ切替</div>
+            <div class="m-settings-row hide">
+              <div class="m-settings-label">現在のデータ</div>
+              <div class="m-settings-value" id="settings-active-path">---</div>
+            </div>
+            <div class="m-settings-row m-settings-actions">
+              <button id="settings-show-active">Finderで表示</button>
+              <button id="settings-create">新規作成</button>
+            </div>
+            <div class="m-settings-list" id="settings-file-list"></div>
+            <div class="m-settings-note hide" id="settings-restart-note">設定を反映するにはアプリを再起動する必要があります。</div>
+          </div>
+          <div class="m-settings-section hide">
+            <div class="m-settings-title">アイコン表示</div>
+            <div class="m-settings-note dim">学校名やプログラム名などを表示予定です。</div>
+            <div class="m-settings-row">
+              <div class="m-settings-label">表示テキスト</div>
+              <input type="text" disabled style="flex: 1; height: 26px;">
+            </div>
+          </div>
+          <div class="m-settings-section hide">
+            <div class="m-settings-title">チームカラー</div>
+            <div class="m-settings-note dim">後日、プリセットから選択できるようにします。</div>
+          </div>
+        </div>
+        <div class="m-settings-footer m-settings-actions">
+          <button id="settings-close">閉じる</button>
+        </div>
+      </div>
+    </div>
   </main>
   <mask>
     <div style="width: 100vw; height: 100vh; background-color: #0005;"></div>
@@ -1143,6 +1296,16 @@
           gameDown: document.getElementById("button-game-down"),
           gameUp: document.getElementById("button-game-up"),
           addGame: document.getElementById("button-add-game")
+        },
+        settings: {
+          icon: document.getElementById("settings-icon"),
+          modal: document.getElementById("m-settings"),
+          close: document.getElementById("settings-close"),
+          activePath: document.getElementById("settings-active-path"),
+          fileList: document.getElementById("settings-file-list"),
+          create: document.getElementById("settings-create"),
+          showActive: document.getElementById("settings-show-active"),
+          restartNote: document.getElementById("settings-restart-note")
         },
         rank: {
           gameTitle: document.getElementById("rank-game-title"),
@@ -1232,6 +1395,61 @@
         };
       }
     });
+
+    const settingsState = {
+      restartRequired: false,
+      displayedPath: null,
+      selectedPath: null
+    };
+
+    const setRestartRequired = required => {
+      settingsState.restartRequired = required;
+      Elements.id.settings.restartNote.classList[required ? "remove" : "add"]("hide");
+    };
+
+    const refreshSettingsModal = async () => {
+      const [active, selected, files] = await Promise.all([
+        cBridge.getActiveScoreFile(),
+        cBridge.getSelectedScoreFile(),
+        cBridge.listScoreFiles()
+      ]);
+      const selectedPath = selected?.path || active.path;
+      settingsState.selectedPath = selectedPath;
+      Elements.id.settings.activePath.textContent = active.path;
+      if (!settingsState.displayedPath) settingsState.displayedPath = active.path;
+      Elements.id.settings.fileList.removeChildren();
+
+      for (const file of files){
+        const item = document.createElement("div");
+        const label = document.createElement("div");
+        const meta = document.createElement("div");
+        item.classList.add("m-settings-file-item");
+        label.textContent = file.name;
+        meta.classList.add("m-settings-file-meta");
+        meta.textContent = file.path === settingsState.displayedPath ? "表示中" : "";
+        if (file.path === selectedPath) item.classList.add("selected");
+        item.append(label, meta);
+        item.addEventListener("click", async () => {
+          if (file.path === selectedPath) return;
+          const requiresRestart = file.path !== settingsState.displayedPath;
+          await cBridge.setActiveScoreFile(file.path);
+          setRestartRequired(requiresRestart);
+          refreshSettingsModal();
+        });
+        Elements.id.settings.fileList.append(item);
+      }
+    };
+
+    const openSettingsModal = async () => {
+      Elements.id.settings.modal.classList.remove("hide");
+      settingsState.displayedPath = null;
+      setRestartRequired(false);
+      await refreshSettingsModal();
+    };
+
+    const closeSettingsModal = () => {
+      Elements.id.settings.modal.classList.add("hide");
+    };
 
     const showTeamScore = () => {
       const wholeTeamScore = calcTeamScore();
@@ -1816,6 +2034,31 @@
         submitScoreData();
       };
 
+      const handleSettingsIconClick = function (event){
+        event.preventDefault();
+        openSettingsModal();
+      };
+
+      const handleSettingsCloseClick = function (event){
+        event.preventDefault();
+        closeSettingsModal();
+      };
+
+      const handleSettingsCreateClick = async function (event){
+        event.preventDefault();
+        const created = await cBridge.createScoreFile();
+        await cBridge.setActiveScoreFile(created.path);
+        setRestartRequired(true);
+        refreshSettingsModal();
+      };
+
+      const handleSettingsShowActiveClick = async function (event){
+        event.preventDefault();
+        const targetPath = settingsState.selectedPath || settingsState.displayedPath;
+        if (!targetPath) return;
+        await cBridge.showScoreFile(targetPath);
+      };
+
       Elements.window.addEventListener("resize", handleResize, { passive: false });
       Elements.id.side_gameUl.addEventListener("scroll", handleSideGameScroll, { passive: false });
       Elements.id.button.addGame.addEventListener("click", handleAddGameClick, { passive: false });
@@ -1836,6 +2079,10 @@
       Elements.id.deduction.apply.addEventListener("click", handleDeductionApplyClick, { passive: false });
       Elements.id.configDeductionLevel.addEventListener("input", handleConfigDeductionLevelInput, { passive: false });
       Elements.id.configDeductionLimit.addEventListener("input", handleConfigDeductionLimitInput, { passive: false });
+      Elements.id.settings.icon.addEventListener("click", handleSettingsIconClick, { passive: false });
+      Elements.id.settings.close.addEventListener("click", handleSettingsCloseClick, { passive: false });
+      Elements.id.settings.create.addEventListener("click", handleSettingsCreateClick, { passive: false });
+      Elements.id.settings.showActive.addEventListener("click", handleSettingsShowActiveClick, { passive: false });
 
       handleResize();
       handleSideGameScroll.call(Elements.id.side_gameUl);
