@@ -1,6 +1,6 @@
 {
-  "name": "@looksky495/fescore",
-  "version": "2.0.0",
+  "name": "com.looksky495.fescore",
+  "version": "2.0.1",
   "description": "スコアボードです。",
   "type": "module",
   "main": "main.js",
